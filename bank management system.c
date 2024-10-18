@@ -4,12 +4,12 @@
 int i,j;
 int main_exit;
 void menu();
+void transfer();
 struct date{
     int month,day,year;
 
     };
 struct {
-
     char name[60];
     int acc_no,age;
     char address[60];
@@ -22,6 +22,48 @@ struct {
     struct date withdraw;
 
     }add,upd,check,rem,transaction;
+
+struct loan {
+  int loan_id;  // Unique identifier for the loan
+  int account_no;  // Account number of the borrower
+  float loan_amount;  // Amount borrowed
+  int loan_term;  // Loan duration (months)
+  float interest_rate;  // Interest rate for the loan
+  float emi;  // Equated Monthly Installment
+  char status[10];  // Status of the loan (e.g., Pending, Approved, Rejected)
+};
+
+void apply_for_loan() {
+  struct loan new_loan;
+  int choice;
+
+  printf("Enter account number: ");
+  scanf("%d", &new_loan.account_no);
+
+  // Check if account exists (use existing logic from view_list)
+
+  printf("Enter loan amount: ");
+  scanf("%f", &new_loan.loan_amount);
+
+  printf("Enter loan term (months): ");
+  scanf("%d", &new_loan.loan_term);
+
+  // Set interest rate based on loan type (implement logic to choose from different loan options)
+
+  // Calculate EMI (emi = loan_amount * (interest_rate/100 * (1 + interest_rate/100) ^ loan_term) / ((1 + interest_rate/100) ^ loan_term - 1))
+
+  printf("Your estimated EMI is: %.2f\n", new_loan.emi);
+
+  printf("Are you sure you want to apply for this loan? (1 - Yes, 0 - No): ");
+  scanf("%d", &choice);
+
+  if (choice == 1) {
+    // Store loan application details (implement logic to save loan data)
+    printf("Loan application submitted successfully! You will be notified of the decision soon.\n");
+  } else {
+    printf("Loan application cancelled.\n");
+  }
+}
 
 float interest(float t,float amount,int rate)
 {
@@ -486,38 +528,119 @@ void see(void)
 
 }
 
-void menu(void)
-{   int choice;
+void menu(void){
+    int choice;
     system("cls");
     system("color 9");
     printf("\n\n\t\t\tCUSTOMER ACCOUNT BANKING MANAGEMENT SYSTEM");
     printf("\n\n\n\t\t\t\xB2\xB2\xB2\xB2\xB2\xB2\xB2 WELCOME TO THE MAIN MENU \xB2\xB2\xB2\xB2\xB2\xB2\xB2");
-    printf("\n\n\t\t1.Create new account\n\t\t2.Update information of existing account\n\t\t3.For transactions\n\t\t4.Check the details of existing account\n\t\t5.Removing existing account\n\t\t6.View customer's list\n\t\t7.Exit\n\n\n\n\n\t\t Enter your choice:");
-    scanf("%d",&choice);
+    printf("\n\n\t\t1.Create new account\n\t\t2.Update information of existing account\n\t\t3.For transactions\n\t\t4.Check the details of existing account\n\t\t5.Removing existing account\n\t\t6.View customer's list\n\t\t7.Transfer funds\n\t\t8.Loan part\n\t\t9.Exit\n\n\n\n\n\t\t Enter your choice:");
+    scanf("%d", &choice);
 
     system("cls");
-    switch(choice)
-    {
-        case 1:new_acc();
+    switch (choice) {
+        case 1:
+            new_acc(); 
         break;
-        case 2:edit();
+        case 2:
+            edit(); 
         break;
-        case 3:transact();
+        case 3:
+            transact(); 
         break;
-        case 4:see();
+        case 4:
+            see(); 
         break;
-        case 5:erase();
+        case 5:
+            erase(); 
         break;
-        case 6:view_list();
+        case 6:
+            view_list(); 
         break;
-        case 7:exit(0);
+        case 7:
+            transfer(); 
         break;
+        case 8:
+            apply_for_loan();
+        case 9:
+            exit(0); 
+        break;
+    }   
+}
+void transfer() {
+    int src_acc_no, dest_acc_no, test_src = 0, test_dest = 0;
+    float transfer_amt;
+    FILE *old, *newrec;
 
+    old = fopen("record.dat", "r");
+    newrec = fopen("new.dat", "w");
+
+    printf("Enter the account number to transfer from: ");
+    scanf("%d", &src_acc_no);
+
+    printf("Enter the account number to transfer to: ");
+    scanf("%d", &dest_acc_no);
+
+    printf("Enter the amount to transfer: $");
+    scanf("%f", &transfer_amt);
+
+    while(fscanf(old, "%d %s %d/%d/%d %d %s %s %lf %s %f %d/%d/%d",
+           &add.acc_no, add.name, &add.dob.month, &add.dob.day, &add.dob.year, &add.age, 
+           add.address, add.citizenship, &add.phone, add.acc_type, &add.amt, 
+           &add.deposit.month, &add.deposit.day, &add.deposit.year) != EOF){
+
+        if(add.acc_no == src_acc_no){
+            test_src = 1;
+            if(add.amt < transfer_amt){
+                printf("\nInsufficient funds in the source account!\n");
+                test_src = -1;
+            }
+            else{
+                add.amt -= transfer_amt;
+            }
+        }
+
+        if(add.acc_no == dest_acc_no){
+            test_dest = 1;
+            if(test_src != -1){
+                add.amt += transfer_amt;
+            }
+        }
+
+        fprintf(newrec, "%d %s %d/%d/%d %d %s %s %lf %s %f %d/%d/%d\n", 
+                add.acc_no, add.name, add.dob.month, add.dob.day, add.dob.year, 
+                add.age, add.address, add.citizenship, add.phone, add.acc_type, 
+                add.amt, add.deposit.month, add.deposit.day, add.deposit.year);
     }
 
+    fclose(old);
+    fclose(newrec);
 
+    if(test_src == -1){
+        printf("\nTransfer Failed! Insufficient funds!\n");
+        remove("new.dat");
+    }
+    else if(test_src == 0 || test_dest == 0){
+        printf("\nInvalid account number(s)!\n");
+        remove("new.dat");
+    }
+    else{
+        printf("\nTransfer completed successfully!\n");
+        remove("record.dat");
+        rename("new.dat", "record.dat");
+    }
 
+    printf("\nEnter 1 to go to the main menu and 0 to exit: ");
+    scanf("%d", &main_exit);
+    system("cls");
+    if(main_exit == 1){
+        menu();
+    }
+    else{
+        exit(0);
+    }
 }
+
 int main()
 {
     char pass[10],password[10]="codewithc";
