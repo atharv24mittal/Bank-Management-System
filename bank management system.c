@@ -34,6 +34,7 @@ struct loan {
 };
 
 // Function to calculate EMI and loan application
+// Function to calculate EMI and loan application
 void apply_for_loan() {
     struct loan new_loan;
     int choice;
@@ -54,13 +55,19 @@ void apply_for_loan() {
     scanf("%d", &new_loan.account_no);
 
     // Check if account exists (you should implement logic to verify if the account exists)
-
+    // Assuming 'check' struct has the balance (amt) of the account
     printf("Enter loan amount: ");
     scanf("%f", &new_loan.loan_amount);
 
+    // Condition to check if balance is at least 1.5 times the loan amount
+    if (check.amt < (1.5 * new_loan.loan_amount)) {
+        printf("Insufficient balance to apply for this loan. Your balance must be at least 1.5 times the loan amount.\n");
+        return; // Exit the function if the balance is not sufficient
+    }
+
     printf("Enter loan term (in months): ");
     scanf("%d", &new_loan.loan_term);
-
+    
     // Set interest rate based on loan type
     printf("Choose loan type:\n");
     printf("1. Personal Loan (Interest Rate: 12%%)\n");
@@ -69,7 +76,8 @@ void apply_for_loan() {
     printf("Enter your choice: ");
     scanf("%d", &choice);
 
-    switch (choice) {
+    switch (choice) 
+    {
         case 1:
             new_loan.interest_rate = 12.0; // Personal Loan
             break;
@@ -107,6 +115,7 @@ void apply_for_loan() {
         printf("Loan application cancelled.\n");
     }
 }
+
 
 float interest(float t,float amount,int rate)
 {
