@@ -23,46 +23,89 @@ struct {
 
     }add,upd,check,rem,transaction;
 
+
+
 struct loan {
-  int loan_id;  // Unique identifier for the loan
-  int account_no;  // Account number of the borrower
-  float loan_amount;  // Amount borrowed
-  int loan_term;  // Loan duration (months)
-  float interest_rate;  // Interest rate for the loan
-  float emi;  // Equated Monthly Installment
-  char status[10];  // Status of the loan (e.g., Pending, Approved, Rejected)
+    int account_no;
+    float loan_amount;
+    int loan_term;
+    float interest_rate;
+    float emi;
 };
 
+// Function to calculate EMI and loan application
 void apply_for_loan() {
-  struct loan new_loan;
-  int choice;
+    struct loan new_loan;
+    int choice;
+    char user_password[20];
 
-  printf("Enter account number: ");
-  scanf("%d", &new_loan.account_no);
+    // Ask for user password
+    printf("Enter your password: ");
+    scanf("%s", user_password);
 
-  // Check if account exists (use existing logic from view_list)
+    // Check if the password is correct
+    if (strcmp(user_password,"codewithc") != 0) {
+        printf("Incorrect password! Access denied.\n");
+        return; // Exit the function if the password is incorrect
+    }
 
-  printf("Enter loan amount: ");
-  scanf("%f", &new_loan.loan_amount);
+    // Continue with loan application process
+    printf("Enter account number: ");
+    scanf("%d", &new_loan.account_no);
 
-  printf("Enter loan term (months): ");
-  scanf("%d", &new_loan.loan_term);
+    // Check if account exists (you should implement logic to verify if the account exists)
 
-  // Set interest rate based on loan type (implement logic to choose from different loan options)
+    printf("Enter loan amount: ");
+    scanf("%f", &new_loan.loan_amount);
 
-  // Calculate EMI (emi = loan_amount * (interest_rate/100 * (1 + interest_rate/100) ^ loan_term) / ((1 + interest_rate/100) ^ loan_term - 1))
+    printf("Enter loan term (in months): ");
+    scanf("%d", &new_loan.loan_term);
 
-  printf("Your estimated EMI is: %.2f\n", new_loan.emi);
+    // Set interest rate based on loan type
+    printf("Choose loan type:\n");
+    printf("1. Personal Loan (Interest Rate: 12%%)\n");
+    printf("2. Home Loan (Interest Rate: 8%%)\n");
+    printf("3. Education Loan (Interest Rate: 6%%)\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
 
-  printf("Are you sure you want to apply for this loan? (1 - Yes, 0 - No): ");
-  scanf("%d", &choice);
+    switch (choice) {
+        case 1:
+            new_loan.interest_rate = 12.0; // Personal Loan
+            break;
+        case 2:
+            new_loan.interest_rate = 8.0;  // Home Loan
+            break;
+        case 3:
+            new_loan.interest_rate = 6.0;  // Education Loan
+            break;
+        default:
+            printf("Invalid choice! Setting interest rate to 12%% by default.\n");
+            new_loan.interest_rate = 12.0; // Default interest rate
+    }
 
-  if (choice == 1) {
-    // Store loan application details (implement logic to save loan data)
-    printf("Loan application submitted successfully! You will be notified of the decision soon.\n");
-  } else {
-    printf("Loan application cancelled.\n");
-  }
+    // Calculate EMI
+    float monthly_rate = new_loan.interest_rate / (12 * 100); // Monthly interest rate
+    new_loan.emi = (new_loan.loan_amount * monthly_rate * pow(1 + monthly_rate, new_loan.loan_term)) / 
+                   (pow(1 + monthly_rate, new_loan.loan_term) - 1);
+
+    // Display EMI calculation details
+    printf("\nLoan Amount: %.2f\n", new_loan.loan_amount);
+    printf("Loan Term: %d months\n", new_loan.loan_term);
+    printf("Interest Rate: %.2f%%\n", new_loan.interest_rate);
+    printf("Estimated EMI: %.2f\n", new_loan.emi);
+    printf("Total Amount Payable: %.2f\n", new_loan.emi * new_loan.loan_term);
+    printf("Total Interest Payable: %.2f\n", (new_loan.emi * new_loan.loan_term) - new_loan.loan_amount);
+
+    printf("Are you sure you want to apply for this loan? (1 - Yes, 0 - No): ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        // Store loan application details (implement logic to save loan data)
+        printf("Loan application submitted successfully! You will be notified of the decision soon.\n");
+    } else {
+        printf("Loan application cancelled.\n");
+    }
 }
 
 float interest(float t,float amount,int rate)
